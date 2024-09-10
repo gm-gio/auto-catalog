@@ -1,0 +1,35 @@
+version: '3.9'
+services:
+  postgres:
+    container_name: postgres
+    image: postgres:latest
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: postgres
+    ports:
+      - "${POSTGRES_PORT}:${POSTGRES_PORT}"
+    volumes:
+      - ${MIGRATION_SCRIPTS}:/docker-entrypoint-initdb.d
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+    ports:
+      - "${PGADMIN_PORT}:${PGADMIN_PORT}"
+  auto-catalog:
+    build: .
+    ports:
+      - "${AUTO_CATALOG_PORT}:${AUTO_CATALOG_PORT}"
+    container_name: auto-catalog
+    environment:
+      POSTGRES_URL: jdbc:postgresql://postgres:5432/postgres
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    depends_on:
+      - postgres
+      - pgadmin
